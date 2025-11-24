@@ -1,21 +1,27 @@
+import os
 from langchain.chains import RetrievalQA
 from langchain_chroma import Chroma
-from langchain_ollama import OllamaLLM
-from langchain_ollama.embeddings import OllamaEmbeddings
+from langchain_groq import ChatGroq
+from langchain.embeddings import HuggingFaceEmbeddings
 
 
 def load_qa_chain(persist_directory: str):
     """
-    Loads a Chroma vector store and builds a RetrievalQA chain using Ollama.
+    Loads a Chroma vector store and builds a RetrievalQA chain using Groq LLM.
     """
 
-    # Load LLaMA model
-    llm = OllamaLLM(model="llama3.2")
+    # 1. Load Groq LLM
+    llm = ChatGroq(
+        groq_api_key=os.getenv("GROQ_API_KEY"),
+        model_name="mixtral-8x7b-32768"  # You can also use llama3-8b
+    )
 
-    # Embeddings model
-    embedding_function = OllamaEmbeddings(model="mxbai-embed-large")
+    # 2. Embeddings model
+    embedding_function = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
 
-    # Load vector database
+    # 3. Load vector database
     vectordb = Chroma(
         persist_directory=persist_directory,
         embedding_function=embedding_function
@@ -23,7 +29,7 @@ def load_qa_chain(persist_directory: str):
 
     retriever = vectordb.as_retriever(search_kwargs={"k": 4})
 
-    # Create QA Chain
+    # 4. Create QA Chain
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",

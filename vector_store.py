@@ -1,6 +1,6 @@
 import os
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_ollama.embeddings import OllamaEmbeddings
+from langchain.embeddings import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 
 
@@ -14,8 +14,10 @@ def create_vector_store(pdf_path: str, persist_directory: str):
     loader = PyPDFLoader(pdf_path)
     pages = loader.load_and_split()
 
-    # 2. Embedding function
-    embeddings = OllamaEmbeddings(model="mxbai-embed-large")
+    # 2. Embedding function (Cloud-friendly)
+    embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
 
     # 3. Build Chroma DB
     vectordb = Chroma.from_documents(
@@ -23,7 +25,5 @@ def create_vector_store(pdf_path: str, persist_directory: str):
         embedding=embeddings,
         persist_directory=persist_directory
     )
-
-    # vectordb.persist()  # ensure data is saved to disk
 
     return vectordb
