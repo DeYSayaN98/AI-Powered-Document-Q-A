@@ -1,8 +1,10 @@
+streamlit
 langchain
 langchain-core
 langchain-community
 langchain-chroma
-langchain-ollama
-PyPDF2
-streamlit
+chromadb
+pypdf
 tiktoken
+sentence-transformers
+langchain-groq
